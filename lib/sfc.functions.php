@@ -78,14 +78,34 @@ function textMiddle($text, $left, $right) {
  * 获取一个bduss对应的百度用户名
  *
  * @param string $bduss BDUSS
- * @return string|bool 百度用户名，失败返回FALSE
+ * @return string 百度用户名，失败返回""
  */
-function getBaiduId($bduss){
-	$c = new wcurl('http://wapp.baidu.com/');
-    $c->addCookie(array('BDUSS' => $bduss,'BAIDUID' => strtoupper(md5(time()))));
-	$data = $c->get();
-	$c->close();
-	return urldecode(textMiddle($data,'i?un=','">'));
+function getBaiduId(string $bduss){
+    //$c = new wcurl('http://top.baidu.com/user/pass');
+    //$c->addCookie(array('BDUSS' => $bduss));
+    //$data = $c->get();
+    //$c->close();
+	$userData = getBaiduUserInfo($bduss);
+    return isset($userData["name"]) ? $userData["name"] : "";
+}
+
+/**
+ * 获取一个bduss对应的百度用户信息
+ *
+ * @param string $bduss BDUSS
+ * @return array|bool 百度用户信息，失败返回FALSE
+ */
+function getBaiduUserInfo(string $bduss){
+    $c = new wcurl('https://tieba.baidu.com/mg/o/profile?format=json');
+    $c->addCookie(array('BDUSS' => $bduss));
+    $data = $c->get();
+    $c->close();
+    $data = json_decode($data, true);
+	$data = isset($data["data"]["user"]) ? $data["data"]["user"] : false;
+    if ($data) {
+        $data["portrait"] = preg_replace("/\?t=.*/", "", $data["portrait"]);
+    }
+    return $data;
 }
 
 /**
@@ -981,7 +1001,8 @@ function csrf($strict = true) {
 	if(empty($i['opt']['csrf'])) {
 		if(empty($_SERVER['HTTP_REFERER']) && $strict) redirect('index.php');
 		$p = parse_url($_SERVER['HTTP_REFERER']);
-		if(!$p || empty($p['host'])) msg('CSRF防御：无效请求。<a href="https://git.oschina.net/kenvix/Tieba-Cloud-Sign/wikis/%E5%85%B3%E4%BA%8E%E4%BA%91%E7%AD%BE%E5%88%B0CSRF%E9%98%B2%E5%BE%A1" target="_blank">了解更多关于CSRF防御...</a>');
-		if($p['host'] != $_SERVER['SERVER_NAME']) msg('CSRF防御：错误的请求来源<a href="https://git.oschina.net/kenvix/Tieba-Cloud-Sign/wikis/%E5%85%B3%E4%BA%8E%E4%BA%91%E7%AD%BE%E5%88%B0CSRF%E9%98%B2%E5%BE%A1" target="_blank">了解更多关于CSRF防御...</a>');
+		$parse_system_url = parse_url(isset($i["opt"]["system_url"]) ? $i["opt"]["system_url"] : "");
+		if(!$p || empty($p['host'])) msg('CSRF防御：无效请求。<a href="https://github.com/MoeNetwork/Tieba-Cloud-Sign/wiki/%E5%85%B3%E4%BA%8E%E4%BA%91%E7%AD%BE%E5%88%B0CSRF%E9%98%B2%E5%BE%A1" target="_blank">了解更多关于CSRF防御...</a>');
+		if($p['host'] != ($parse_system_url['host'] ? $parse_system_url['host'] : '')) msg('CSRF防御：错误的请求来源<a href="https://github.com/MoeNetwork/Tieba-Cloud-Sign/wiki/%E5%85%B3%E4%BA%8E%E4%BA%91%E7%AD%BE%E5%88%B0CSRF%E9%98%B2%E5%BE%A1" target="_blank">了解更多关于CSRF防御...</a>');
 	}
 }

@@ -101,7 +101,6 @@ class misc {
 	 * @param string $kw 贴吧名
 	 * @return string|boolean FID，如果没有缓存则返回false
 	 */
-	/*
 	public static function findFid($kw) {
 		global $i;
 		global $m;
@@ -114,7 +113,6 @@ class misc {
 		}
 		return false;
 	}
-	*/
 
 	/**
 	 * 批量设置贴吧 FID
@@ -140,22 +138,14 @@ class misc {
 
 	public static function getFid($kw) {
 		global $m;
-		/*
 		$f  = misc::findFid($kw);
 		if ($f) {
 			return $f; 
 		} else {
-		*/
-			$ch = new wcurl('http://tieba.baidu.com/mo/m?kw='.urlencode($kw), array('User-Agent: fuck phone','Referer: http://wapp.baidu.com/','Content-Type: application/x-www-form-urlencoded','Cookie:BAIDUID='.strtoupper(md5(time()))));
-			$s  = $ch->exec();
-			//self::mSetFid($kw,$fid[1]);
-			$x  = easy_match('<input type="hidden" name="fid" value="*"/>',$s);
-			if (isset($x[1])) {
-				return $x[1];
-			} else {
-				return false;
-			}
-		//}
+			$ch = new wcurl('http://tieba.baidu.com/f/commit/share/fnameShareApi?ie=utf-8&fname=' . urlencode($kw), array('User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 14_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.1 Mobile/15E148 Safari/604.1','Referer: http://tieba.baidu.com/'));
+			$r = json_decode($ch->exec(), true);
+			return $r['no'] === '0' ? $r['data']['fid'] : false;
+		}
 	}
 
 	/**
@@ -163,7 +153,7 @@ class misc {
 	 */
 
 	public static function getTbs($uid,$bduss){
-		$ch = new wcurl('http://tieba.baidu.com/dc/common/tbs', array('User-Agent: fuck phone','Referer: http://tieba.baidu.com/','X-Forwarded-For: 115.28.1.'.mt_rand(1,255)));
+		$ch = new wcurl('http://tieba.baidu.com/dc/common/tbs', array('User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 14_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.1 Mobile/15E148 Safari/604.1','Referer: http://tieba.baidu.com/','X-Forwarded-For: ' . mt_rand(0,255) . '.' . mt_rand(0,255) . '.' . mt_rand(0,255) . '.' . mt_rand(0,255)));
 		$ch->addcookie("BDUSS=". $bduss);
 		$x = json_decode($ch->exec(),true);
 		return $x['tbs'];
@@ -228,7 +218,7 @@ class misc {
 	 */
 	public static function DoSign_Mobile($uid,$kw,$id,$pid,$fid,$ck) {
 		//没问题了
-		$ch = new wcurl('http://tieba.baidu.com/mo/q/sign?tbs='.misc::getTbs($uid,$ck).'&kw='.urlencode($kw).'&is_like=1&fid='.$fid ,array('User-Agent: fuck phone','Referer: http://tieba.baidu.com/f?kw='.$kw , 'Host: tieba.baidu.com','X-Forwarded-For: 115.28.1.'.mt_rand(1,255), 'Origin: http://tieba.baidu.com', 'Connection: Keep-Alive'));
+		$ch = new wcurl('http://tieba.baidu.com/mo/q/sign?tbs='.misc::getTbs($uid,$ck).'&kw='.urlencode($kw).'&is_like=1&fid='.$fid ,array('User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 14_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.1 Mobile/15E148 Safari/604.1','Referer: http://tieba.baidu.com/f?kw='.$kw , 'Host: tieba.baidu.com','X-Forwarded-For: ' . mt_rand(0,255) . '.' . mt_rand(0,255) . '.' . mt_rand(0,255) . '.' . mt_rand(0,255), 'Origin: http://tieba.baidu.com', 'Connection: Keep-Alive'));
 		$ch->addcookie(array('BDUSS' => $ck,'BAIDUID' => strtoupper(md5(time()))));
 		return $ch->exec();
 	}
@@ -239,7 +229,7 @@ class misc {
 	public static function DoSign_Default($uid,$kw,$id,$pid,$fid,$ck) {
 		global $m,$today;
         $cookie = array('BDUSS' => $ck,'BAIDUID' => strtoupper(md5(time())));
-		$ch = new wcurl('http://tieba.baidu.com/mo/m?kw='.urlencode($kw).'&fid='.$fid, array('User-Agent: fuck phone','Referer: http://wapp.baidu.com/','Content-Type: application/x-www-form-urlencoded'));
+		$ch = new wcurl('http://tieba.baidu.com/mo/m?kw='.urlencode($kw).'&fid='.$fid, array('User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 14_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.1 Mobile/15E148 Safari/604.1','Referer: http://wapp.baidu.com/','Content-Type: application/x-www-form-urlencoded'));
 		$ch->addcookie($cookie);
 		$s  = $ch->exec();
 		$ch->close();
@@ -249,13 +239,13 @@ class misc {
 				array(
 					'Accept: text/html, application/xhtml+xml, */*',
 					'Accept-Language: zh-Hans-CN,zh-Hans;q=0.8,en-US;q=0.5,en;q=0.3',
-					'User-Agent: Fucking Phone'
+					'User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 14_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.1 Mobile/15E148 Safari/604.1'
 				));
 			$ch->addcookie($cookie);
 			$ch->exec();
 			$ch->close();
 			//临时判断解决方案
-			$ch = new wcurl('http://tieba.baidu.com/mo/m?kw='.urlencode($kw).'&fid='.$fid, array('User-Agent: fuck phone','Referer: http://wapp.baidu.com/','Content-Type: application/x-www-form-urlencoded'));
+			$ch = new wcurl('http://tieba.baidu.com/mo/m?kw='.urlencode($kw).'&fid='.$fid, array('User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 14_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.1 Mobile/15E148 Safari/604.1','Referer: http://wapp.baidu.com/','Content-Type: application/x-www-form-urlencoded'));
 			$ch->addcookie($cookie);
 			$s = $ch->exec();
 			$ch->close();
@@ -270,7 +260,7 @@ class misc {
 	 * 客户端签到
 	 */
 	public static function DoSign_Client($uid,$kw,$id,$pid,$fid,$ck){
-		$ch = new wcurl('http://c.tieba.baidu.com/c/c/forum/sign', array('Content-Type: application/x-www-form-urlencoded','User-Agent: Fucking iPhone/1.0 BadApple/99.1'));
+		$ch = new wcurl('http://c.tieba.baidu.com/c/c/forum/sign', array('Content-Type: application/x-www-form-urlencoded','User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 14_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.1 Mobile/15E148 Safari/604.1'));
 		$ch->addcookie("BDUSS=".$ck);
 		$temp = array(
 			'BDUSS' => misc::getCookie($pid),
@@ -533,12 +523,18 @@ class misc {
 		return $rt;
 	}
 
+	public static function getTieba2(string $bduss, int $pn = 1): string{
+        $tl = new wcurl("https://tieba.baidu.com/mg/o/getForumHome?st=0&pn={$pn}&rn=200",['User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36']);
+        $tl->addCookie(array('BDUSS' => $bduss));
+        return $tl->get();
+    }
+
 	/**
 	 * 扫描指定PID的所有贴吧
 	 * @param string $pid PID
 	 */
 	public static function scanTiebaByPid($pid) {
-    	global $m;
+		global $m;
 		$cma    = $m->once_fetch_array("SELECT * FROM `".DB_PREFIX."baiduid` WHERE `id` = '{$pid}';");
 		$uid    = $cma['uid'];
 		$table  = self::getTable($uid);
@@ -551,22 +547,23 @@ class misc {
 		$pn     = 1;
 		$a      = 0;
 		while (true){
-    		if (empty($bid)) break;
-			$rc     = self::getTieba($bid,$bduss,$pn);
-			$rc     = json_decode($rc,true);
-			$ngf    = $rc['forum_list']['non-gconforum'];
-			foreach ($rc['forum_list']['gconforum'] as $v) $ngf[] = $v;
+			if (empty($bid)) break;
+			$rc = self::getTieba2($bduss,$pn);//fetch forum list //default 200 per page
+			$rc = json_decode($rc,true);
+			$ngf = isset($rc["data"]["like_forum"]["list"]) ? $rc["data"]["like_forum"]["list"] : [];
 			foreach ($ngf as $v){
 				if ($tb['c'] + $a >= $o && !empty($o) && !$isvip) break;
-				$vn  = addslashes(htmlspecialchars($v['name']));
+				$vn  = addslashes(htmlspecialchars($v['forum_name']));
 				$ist = $m->once_fetch_array("SELECT COUNT(id) AS `c` FROM `".DB_NAME."`.`".DB_PREFIX.$table."` WHERE `pid` = {$pid} AND `tieba` = '{$vn}';");
 				if ($ist['c'] == 0){
 					$a ++;
-					$m->query("INSERT INTO `".DB_NAME."`.`".DB_PREFIX.$table."` (`pid`,`fid`, `uid`, `tieba`) VALUES ({$pid},'{$v['id']}', {$uid}, '{$vn}');");
+					$m->query("INSERT INTO `".DB_NAME."`.`".DB_PREFIX.$table."` (`pid`,`fid`, `uid`, `tieba`) VALUES ({$pid},'{$v['forum_id']}', {$uid}, '{$vn}');");
 				}
 			}
-			if ((count($ngf) < 1)) break;
-			$pn ++;
+			$pn++;
+			if ($pn > $rc["data"]["like_forum"]["page"]["total_page"]) {
+			    break;
+			}
 		}
 	}
 
@@ -592,4 +589,49 @@ class misc {
 			$t = self::scanTiebaByPid($pid);
 		}
 	}
+
+	/**
+     * 获得二维码及sign
+     */
+    public static function get_login_qrcode() :array {
+        $resp = ["sign" => null, "imgurl" => null];
+        $get_qrcode = json_decode((new wcurl("https://passport.baidu.com/v2/api/getqrcode?lp=pc"))->get(), true);
+        if(isset($get_qrcode["imgurl"]) && isset($get_qrcode["sign"])){
+            $resp = ["sign" => $get_qrcode["sign"], "imgurl" => $get_qrcode["imgurl"]];
+        }
+        return $resp;
+    }
+    public static function get_real_bduss(string $sign) :array{
+        //status code
+        //errno不等于0或1时需要要求更换二维码及sign
+        //-1 更换二维码
+        //0 进入下一步
+        //1 无需操作
+        //2 已确认
+        $r = ["error" => 1, "bduss" => "", "msg" => ""];
+        $response = (new wcurl("https://passport.baidu.com/channel/unicast?channel_id={$sign}&callback="))->get();
+        if ($response) {
+            $responseParse = json_decode(str_replace(array("(",")"),'',$response),true);
+            if(!$responseParse["errno"]){
+                $channel_v = json_decode($responseParse["channel_v"],true);
+                if($channel_v["status"]){
+                    $r["error"] = -1;
+                    $r["msg"] = "Continue";
+                }else{
+                    $s_bduss = json_decode(preg_replace("/'([^'']+)'/", '"$1"', str_replace("\\&", "&", (new wcurl('https://passport.baidu.com/v3/login/main/qrbdusslogin?bduss='.$channel_v["v"]))->get())), true);
+                    if ($s_bduss && $s_bduss["code"] === "110000") {
+                        $r["error"] = 0;
+                        $r["msg"] = "Success";
+                        $r["bduss"] = $s_bduss["data"]["session"]["bduss"];
+                    }
+                }
+            }else{
+                $r["error"] = $responseParse["errno"];
+            }
+        }else{
+            $r["error"] = -2;
+            $r["msg"] = "Invalid QR Code";
+        }
+        return $r;
+    }
 }
